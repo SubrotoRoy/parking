@@ -2,14 +2,9 @@ package kafkaservice
 
 import (
 	"context"
+	"os"
 
 	"github.com/segmentio/kafka-go"
-)
-
-//constants for kafka config
-const (
-	CARPARKINGTOPIC = "test-parking"
-	BROKER          = "localhost:9092"
 )
 
 //KafkaSvc will be used as reciver to associate kafka methods to it
@@ -25,8 +20,8 @@ type Services interface {
 //NewKafkaService creates new writer to kafka
 func NewKafkaService() *KafkaSvc {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{BROKER},
-		Topic:   CARPARKINGTOPIC,
+		Brokers: []string{os.Getenv("BROKER")},
+		Topic:   os.Getenv("TOPIC"),
 	})
 
 	return &KafkaSvc{Reader: r}
