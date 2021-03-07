@@ -40,7 +40,6 @@ func (dc *DBRepo) DBConnect(config model.DbConfig) error {
 
 	if err != nil {
 		log.Printf("Unable to connect DB %v", err)
-		return err
 	}
 	log.Printf("Postgres started at %s PORT", config.Port)
 	return err
@@ -54,13 +53,11 @@ func (dc *DBRepo) CreateTables() error {
 
 //CreateParkingRecord adds records to db
 func (dc *DBRepo) CreateParkingRecord(parking model.Parking) error {
-	log.Println("Creating records")
 	return dc.GormDB.Debug().Save(&parking).Error
 }
 
 //CreateParkingSlots creates records in slots table
 func (dc *DBRepo) CreateParkingSlots(slot []model.Slot) error {
-	log.Println("CreateInBatches")
 	return dc.GormDB.Debug().CreateInBatches(slot, 100).Error
 }
 
@@ -83,7 +80,9 @@ func (dc *DBRepo) GetParkingInfo(carNumber string) (model.Parking, error) {
 	var car model.Car
 	var parkingInfo model.Parking
 	err := dc.GormDB.Debug().Where(`car_number = ?`, carNumber).Find(&car).Error
+	parkingInfo.Car = car
 	err = dc.GormDB.Debug().Where(`car_id = ? and has_exited = false`, car.ID).Find(&parkingInfo).Error
+	err = dc.GormDB.Debug().Where(`id=?`, parkingInfo.PersonID).Find(&(parkingInfo.Person)).Error
 	return parkingInfo, err
 }
 
@@ -97,6 +96,3 @@ func (dc *DBRepo) UnParkCar(parking model.Parking) error {
 	err = dc.GormDB.Debug().Exec(`Update slots set is_occupied = ? where id = ?`, false, parking.SlotID).Error
 	return nil
 }
-
-// COLLECT the parking info and from there get the slot id and parking id
-//change parking id has_exited = true and slot id is_occupied as false
