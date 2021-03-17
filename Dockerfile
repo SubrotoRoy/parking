@@ -12,7 +12,7 @@ COPY . .
 RUN go get -d -v ./...
 
 # Install the package
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./src/
+RUN go build -o main
 
 ######## Start a new stage from scratch #######
 FROM alpine:latest  
